@@ -1,6 +1,5 @@
 const dotenv = require('dotenv')
 const express = require('express')
-const mysql = require('mysql2')
 const session = require('express-session')
 var FileStore = require('session-file-store')(session)
 const qs = require('querystring')
@@ -48,17 +47,6 @@ const ZOHO_AUTH_URL = 'https://accounts.zoho.com/oauth/v2/auth'
 // Load environment variables
 const envFile = `env/dev.env`
 dotenv.config({ path: envFile })
-
-// Database connection
-app.mysqlClient = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 5,
-  queueLimit: 0,
-})
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -563,30 +551,10 @@ app.get('/health', (req, res) => {
   })
 })
 
-// Database connection test
-app.mysqlClient.getConnection(function (err, connection) {
-  if (err) {
-    console.log('Database connection failed:', err)
-  } else {
-    console.log('✅ Database connected successfully')
-    connection.release()
-
-    app.mysqlClient.on('connection', (connection) => {
-      connection.query(`SET time_zone = '+05:30'`, (err) => {
-        if (err) {
-          console.error('Failed to set MySQL timezone:', err)
-        } else {
-          console.log('✅ MySQL timezone set to +05:30')
-        }
-      })
-    })
-
-    // Start server
-    const PORT = process.env.APP_PORT || 3000
-    app.listen(PORT, () => {
-      console.log(`🚀 Server started on port ${PORT}`)
-      console.log(`🌐 Visit https://zoho-connection-cloud-storage.onrender.com to get started`)
-      console.log(`📋 Health check: https://zoho-connection-cloud-storage.onrender.com/health`)
-    })
-  }
+// Start server
+const PORT = process.env.APP_PORT || 3000
+app.listen(PORT, () => {
+  console.log(`🚀 Server started on port ${PORT}`)
+  console.log(`🌐 Visit https://zoho-connection-cloud-storage.onrender.com to get started`)
+  console.log(`📋 Health check: https://zoho-connection-cloud-storage.onrender.com/health`)
 })
